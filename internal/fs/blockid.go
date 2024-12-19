@@ -10,8 +10,6 @@ type BlockId struct {
 	blknum   int16
 }
 
-var blockId *BlockId
-
 func NewBlockId(fileName string, blkNum int16) *BlockId {
 	return &BlockId{
 		filename: fileName,
