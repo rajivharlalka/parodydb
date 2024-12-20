@@ -7,14 +7,14 @@ import (
 	"sync"
 )
 
-type fileMgr struct {
+type FileMgr struct {
 	dbDirectory *os.File
 	blockSize   uint32
 	files       map[string]*os.File
 	mu          *sync.Mutex
 }
 
-func NewFileManager(directory string, blkSize int) (*fileMgr, error) {
+func NewFileManager(directory string, blkSize int) (*FileMgr, error) {
 	dir, err := os.Open(directory)
 	if err != nil && errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(directory, os.ModeDir|os.ModePerm)
@@ -28,10 +28,10 @@ func NewFileManager(directory string, blkSize int) (*fileMgr, error) {
 		return nil, err
 	}
 
-	return &fileMgr{dbDirectory: dir, blockSize: uint32(blkSize), files: make(map[string]*os.File), mu: &sync.Mutex{}}, nil
+	return &FileMgr{dbDirectory: dir, blockSize: uint32(blkSize), files: make(map[string]*os.File), mu: &sync.Mutex{}}, nil
 }
 
-func (f *fileMgr) Read(blk BlockId, p Page) {
+func (f *FileMgr) Read(blk *BlockId, p *Page) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	file := f.getFile(blk.filename)
@@ -45,7 +45,7 @@ func (f *fileMgr) Read(blk BlockId, p Page) {
 	}
 }
 
-func (f *fileMgr) Write(blk BlockId, p Page) {
+func (f *FileMgr) Write(blk *BlockId, p *Page) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	file := f.getFile(blk.filename)
@@ -60,7 +60,7 @@ func (f *fileMgr) Write(blk BlockId, p Page) {
 	}
 }
 
-func (f *fileMgr) Append(filename string) {
+func (f *FileMgr) Append(filename string) *BlockId {
 	size, _ := f.Length(filename)
 	blk := NewBlockId(filename, size)
 	b := make([]byte, f.blockSize)
@@ -78,9 +78,11 @@ func (f *fileMgr) Append(filename string) {
 	if bytesWritten != len(b) {
 		panic("mismatch in bytes read")
 	}
+
+	return blk
 }
 
-func (f *fileMgr) Length(filename string) (int16, error) {
+func (f *FileMgr) Length(filename string) (int16, error) {
 	file := f.getFile(filename)
 	stat, err := file.Stat()
 	if err != nil {
@@ -89,11 +91,11 @@ func (f *fileMgr) Length(filename string) (int16, error) {
 	return int16(stat.Size()) / int16(f.blockSize), nil
 }
 
-func (f *fileMgr) BlockSize() uint32 {
+func (f *FileMgr) BlockSize() uint32 {
 	return f.blockSize
 }
 
-func (f *fileMgr) getFile(filename string) *os.File {
+func (f *FileMgr) getFile(filename string) *os.File {
 	file, ok := f.files[filename]
 	if ok {
 		return file
