@@ -2,6 +2,7 @@ package fs
 
 import (
 	"errors"
+	"io"
 	"os"
 	"path"
 	"sync"
@@ -38,6 +39,9 @@ func (f *FileMgr) Read(blk *BlockId, p *Page) {
 	file.Seek(int64(blk.blknum)*int64(f.blockSize), 0)
 	bytesRead, err := file.Read(p.buffer)
 	if err != nil {
+		if err == io.EOF {
+			return
+		}
 		panic(err)
 	}
 	if bytesRead != len(p.buffer) {
