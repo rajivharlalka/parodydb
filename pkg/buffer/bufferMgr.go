@@ -1,6 +1,9 @@
 package buffer
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -55,31 +58,49 @@ func (bm *BufferMgr) unpin(buff *Buffer) {
 	}
 }
 
-func (bm *BufferMgr) pin(blk *fs.BlockId) *Buffer {
+func (bm *BufferMgr) pin(blk *fs.BlockId) (*Buffer, error) {
 	bm.mu.Lock()
 	defer bm.mu.Unlock()
-	timestamp := time.Now()
-	buff := bm.tryToPin(blk)
-	for buff == nil && !waitingTooLong(timestamp) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(MAX_TIME))
+	defer cancel()
+
+	stop := context.AfterFunc(ctx, func() {
+		bm.notif.L.Lock()
+		bm.notif.Broadcast()
+		bm.notif.L.Unlock()
+	})
+
+	defer stop()
+
+	for {
+		if buff, err := bm.tryToPin(blk); err != nil {
+			return nil, err
+		} else if buff != nil {
+			return buff, nil
+		}
+
 		bm.notif.Wait()
-		buff = bm.tryToPin(blk)
+
+		if ctx.Err() != nil {
+			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+				return nil, fmt.Errorf("buffer abort exception: could not pin block %s: %s", blk.ToString(), ctx.Err().Error())
+			}
+			return nil, ctx.Err()
+		}
 	}
-	if buff == nil {
-		panic("Buffer Abort Exception")
-	}
-	return buff
 }
 
 func waitingTooLong(t time.Time) bool {
 	return time.Now().Unix()-t.Unix() > int64(MAX_TIME)
 }
 
-func (bm *BufferMgr) tryToPin(blk *fs.BlockId) *Buffer {
+func (bm *BufferMgr) tryToPin(blk *fs.BlockId) (*Buffer, error) {
 	buff := bm.findExistingBuffer(blk)
 	if buff == nil {
 		buff = bm.chooseUnpinnedBuffer()
 		if buff == nil {
-			return nil
+			return nil, nil
 		}
 		buff.assignToBlock(blk)
 	}
@@ -87,7 +108,7 @@ func (bm *BufferMgr) tryToPin(blk *fs.BlockId) *Buffer {
 		bm.numAvailable--
 	}
 	buff.pin()
-	return buff
+	return buff, nil
 }
 
 func (bm *BufferMgr) findExistingBuffer(blk *fs.BlockId) *Buffer {

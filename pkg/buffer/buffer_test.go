@@ -14,19 +14,20 @@ func TestBuffers(t *testing.T) {
 	}
 	lm := logmgr.NewLogMgr(fm, "logFile")
 	bm := NewBufferMgr(fm, lm, 2)
-	buff1 := bm.pin(fs.NewBlockId("testFile", 1))
+	buff1, _ := bm.pin(fs.NewBlockId("testFile", 1))
 	p := buff1.Contents
 	n := p.GetInt(80)
+	buff1.setModified(1, 0)
 	p.SetInt(80, n+1)
 	t.Logf("The new value is %d", n+1)
 	bm.unpin(buff1)
 
-	buff2 := bm.pin(fs.NewBlockId("testFile", 2))
+	buff2, _ := bm.pin(fs.NewBlockId("testFile", 2))
 	bm.pin(fs.NewBlockId("testFile", 3))
 	bm.pin(fs.NewBlockId("testFile", 4))
 
 	bm.unpin(buff2)
-	buff2 = bm.pin(fs.NewBlockId("testFile", 1))
+	buff2, _ = bm.pin(fs.NewBlockId("testFile", 1))
 	p2 := buff2.Contents
 	p2.SetInt(80, 9999)
 	buff2.setModified(1, 0)
