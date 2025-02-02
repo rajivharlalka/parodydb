@@ -46,7 +46,7 @@ func (l *LogMgr) flush() {
 
 func appendNewBlock(fm *fs.FileMgr, logfile string, logpage *fs.Page) *fs.BlockId {
 	blk := fm.Append(logfile)
-	logpage.SetInt(0, int32(fm.BlockSize()))
+	logpage.SetInt(0, fm.BlockSize())
 	fm.Write(blk, logpage)
 	return blk
 }
@@ -58,12 +58,12 @@ func (l *LogMgr) Append(logrec []byte) int {
 	boundary := l.logPage.GetInt(0)
 	recordSize := len(logrec)
 	bytesNeeded := recordSize + 4
-	if boundary-int32(bytesNeeded) < 4 {
+	if boundary-bytesNeeded < 4 {
 		l.flush()
 		l.currentblk = appendNewBlock(l.fm, l.logfile, l.logPage)
 		boundary = l.logPage.GetInt(0)
 	}
-	recPos := boundary - int32(bytesNeeded)
+	recPos := boundary - bytesNeeded
 	l.logPage.SetBytes(int(recPos), logrec)
 	l.logPage.SetInt(0, recPos)
 	l.latestLSN += 1

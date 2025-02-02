@@ -25,12 +25,12 @@ func NewPageFromBytes(b []byte) *Page {
 }
 
 // GetInt reads an integer from the specified offset
-func (p *Page) GetInt(offset int) int32 {
-	return int32(binary.BigEndian.Uint32(p.buffer[offset:]))
+func (p *Page) GetInt(offset int) int {
+	return int(binary.BigEndian.Uint32(p.buffer[offset:]))
 }
 
 // SetInt writes an integer to the specified offset
-func (p *Page) SetInt(offset int, n int32) {
+func (p *Page) SetInt(offset int, n int) {
 	binary.BigEndian.PutUint32(p.buffer[offset:], uint32(n))
 }
 
@@ -45,7 +45,7 @@ func (p *Page) GetBytes(offset int) []byte {
 // SetBytes writes a byte slice to the specified offset
 // It first writes the length of the slice (4 bytes) followed by the actual data
 func (p *Page) SetBytes(offset int, b []byte) {
-	p.SetInt(offset, int32(len(b)))
+	p.SetInt(offset, len(b))
 	copy(p.buffer[offset+4:], b)
 }
 

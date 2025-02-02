@@ -7,10 +7,10 @@ import (
 
 type BlockId struct {
 	filename string
-	blknum   int16
+	blknum   int
 }
 
-func NewBlockId(fileName string, blkNum int16) *BlockId {
+func NewBlockId(fileName string, blkNum int) *BlockId {
 	return &BlockId{
 		filename: fileName,
 		blknum:   blkNum,
@@ -21,7 +21,7 @@ func (bid *BlockId) FileName() string {
 	return bid.filename
 }
 
-func (bid *BlockId) Number() int16 {
+func (bid *BlockId) Number() int {
 	return bid.blknum
 }
 

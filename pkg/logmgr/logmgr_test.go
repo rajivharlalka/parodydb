@@ -79,7 +79,7 @@ func createLogRecord(s string, n int) ([]byte, error) {
 
 	p.SetString(0, s)
 
-	p.SetInt(npos, int32(n))
+	p.SetInt(npos, n)
 
 	return p.Contents(), nil
 }

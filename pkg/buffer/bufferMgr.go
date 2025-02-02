@@ -38,7 +38,7 @@ func (bm *BufferMgr) available() int {
 	return bm.numAvailable
 }
 
-func (bm *BufferMgr) flushAll(txNum int) {
+func (bm *BufferMgr) FlushAll(txNum int) {
 	bm.mu.Lock()
 	defer bm.mu.Unlock()
 	for _, buf := range bm.bufferPool {
