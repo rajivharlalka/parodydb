@@ -19,7 +19,7 @@ func newBuffer(fm *fs.FileMgr, lm *logmgr.LogMgr) *Buffer {
 	return &Buffer{fm: fm, lm: lm, Contents: fs.NewPage(int(fm.BlockSize())), Block: nil, pins: 0, txnum: -1, lsn: -1}
 }
 
-func (b *Buffer) setModified(txnum, lsn int) {
+func (b *Buffer) SetModified(txnum, lsn int) {
 	b.txnum = txnum
 	if lsn >= 0 {
 		b.lsn = lsn

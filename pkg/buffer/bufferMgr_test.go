@@ -23,7 +23,7 @@ func TestBufferMgr(t *testing.T) {
 	buff[1] = nil
 	buff[3], _ = bm.Pin(fs.NewBlockId("testFile", 0))
 	buff[4], _ = bm.Pin(fs.NewBlockId("testFile", 1))
-	t.Logf("Available buffers: %d", bm.available())
+	t.Logf("Available buffers: %d", bm.Available())
 	buff[5], err = bm.Pin(fs.NewBlockId("testFile", 3))
 	if err != nil {
 		t.Logf("No Buffers Available")

@@ -32,7 +32,7 @@ func NewBufferMgr(fm *fs.FileMgr, lm *logmgr.LogMgr, numBufs int) *BufferMgr {
 	return bm
 }
 
-func (bm *BufferMgr) available() int {
+func (bm *BufferMgr) Available() int {
 	bm.mu.Lock()
 	defer bm.mu.Unlock()
 	return bm.numAvailable

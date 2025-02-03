@@ -17,7 +17,7 @@ func TestBuffers(t *testing.T) {
 	buff1, _ := bm.Pin(fs.NewBlockId("testFile", 1))
 	p := buff1.Contents
 	n := p.GetInt(80)
-	buff1.setModified(1, 0)
+	buff1.SetModified(1, 0)
 	p.SetInt(80, n+1)
 	t.Logf("The new value is %d", n+1)
 	bm.Unpin(buff1)
@@ -30,6 +30,6 @@ func TestBuffers(t *testing.T) {
 	buff2, _ = bm.Pin(fs.NewBlockId("testFile", 1))
 	p2 := buff2.Contents
 	p2.SetInt(80, 9999)
-	buff2.setModified(1, 0)
+	buff2.SetModified(1, 0)
 	bm.Unpin(buff2)
 }
