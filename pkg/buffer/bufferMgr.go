@@ -48,7 +48,7 @@ func (bm *BufferMgr) FlushAll(txNum int) {
 	}
 }
 
-func (bm *BufferMgr) unpin(buff *Buffer) {
+func (bm *BufferMgr) Unpin(buff *Buffer) {
 	bm.mu.Lock()
 	defer bm.mu.Unlock()
 	buff.unpin()
@@ -58,7 +58,7 @@ func (bm *BufferMgr) unpin(buff *Buffer) {
 	}
 }
 
-func (bm *BufferMgr) pin(blk *fs.BlockId) (*Buffer, error) {
+func (bm *BufferMgr) Pin(blk *fs.BlockId) (*Buffer, error) {
 	bm.mu.Lock()
 	defer bm.mu.Unlock()
 

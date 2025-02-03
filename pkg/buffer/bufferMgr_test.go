@@ -16,22 +16,22 @@ func TestBufferMgr(t *testing.T) {
 	bm := NewBufferMgr(fm, lm, 3)
 
 	buff := make([]*Buffer, 6)
-	buff[0], _ = bm.pin(fs.NewBlockId("testFile", 0))
-	buff[1], _ = bm.pin(fs.NewBlockId("testFile", 1))
-	buff[2], _ = bm.pin(fs.NewBlockId("testFile", 2))
-	bm.unpin(buff[1])
+	buff[0], _ = bm.Pin(fs.NewBlockId("testFile", 0))
+	buff[1], _ = bm.Pin(fs.NewBlockId("testFile", 1))
+	buff[2], _ = bm.Pin(fs.NewBlockId("testFile", 2))
+	bm.Unpin(buff[1])
 	buff[1] = nil
-	buff[3], _ = bm.pin(fs.NewBlockId("testFile", 0))
-	buff[4], _ = bm.pin(fs.NewBlockId("testFile", 1))
+	buff[3], _ = bm.Pin(fs.NewBlockId("testFile", 0))
+	buff[4], _ = bm.Pin(fs.NewBlockId("testFile", 1))
 	t.Logf("Available buffers: %d", bm.available())
-	buff[5], err = bm.pin(fs.NewBlockId("testFile", 3))
+	buff[5], err = bm.Pin(fs.NewBlockId("testFile", 3))
 	if err != nil {
 		t.Logf("No Buffers Available")
 	}
 
-	bm.unpin(buff[2])
+	bm.Unpin(buff[2])
 	buff[2] = nil
-	buff[5], _ = bm.pin(fs.NewBlockId("testFile", 3))
+	buff[5], _ = bm.Pin(fs.NewBlockId("testFile", 3))
 	t.Log("Final Buffer Allocation\n")
 	for i := 0; i < len(buff); i++ {
 		b := buff[i]
