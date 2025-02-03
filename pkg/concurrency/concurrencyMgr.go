@@ -7,6 +7,10 @@ type ConcurrencyMgr struct {
 	locks   map[*fs.BlockId]string
 }
 
+func NewConcurrencyMgr() *ConcurrencyMgr {
+	return &ConcurrencyMgr{}
+}
+
 func (c *ConcurrencyMgr) SLock(blk *fs.BlockId) {
 	if _, has := c.locks[blk]; !has {
 		c.locktbl.SLock(blk)

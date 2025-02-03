@@ -1,10 +1,9 @@
-package recoverymgr
+package concurrency
 
 import (
 	"slices"
 
 	"github.com/rajivharlalka/parodydb/pkg/buffer"
-	"github.com/rajivharlalka/parodydb/pkg/concurrency"
 	"github.com/rajivharlalka/parodydb/pkg/logmgr"
 	"github.com/rajivharlalka/parodydb/pkg/logrecord"
 )
@@ -12,11 +11,11 @@ import (
 type RecoveryMgr struct {
 	lm    *logmgr.LogMgr
 	bm    *buffer.BufferMgr
-	tx    *concurrency.Transaction
+	tx    *Transaction
 	txnum int
 }
 
-func newRecoveryMgr(tx *concurrency.Transaction, txnum int, lm *logmgr.LogMgr, bm *buffer.BufferMgr) *RecoveryMgr {
+func newRecoveryMgr(tx *Transaction, txnum int, lm *logmgr.LogMgr, bm *buffer.BufferMgr) *RecoveryMgr {
 	logrecord.WriteStartRecordToLog(lm, txnum)
 	return &RecoveryMgr{lm, bm, tx, txnum}
 }
