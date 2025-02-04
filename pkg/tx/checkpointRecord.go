@@ -1,4 +1,4 @@
-package logrecord
+package tx
 
 import (
 	"encoding/binary"
@@ -40,7 +40,7 @@ func (s *CheckpointRecord) TxNumber() int {
 }
 
 // Implement
-func (s *CheckpointRecord) Undo(txnum int) {}
+func (s *CheckpointRecord) Undo(tx *Transaction) {}
 
 func (s *CheckpointRecord) ToString() string {
 	return fmt.Sprintf("<CHECKPOINT %d %v %d %s>", s.txnum, s.blk, s.offset, s.val)

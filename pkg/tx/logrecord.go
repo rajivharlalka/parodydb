@@ -1,4 +1,4 @@
-package logrecord
+package tx
 
 import (
 	"github.com/rajivharlalka/parodydb/pkg/fs"
@@ -16,7 +16,7 @@ const (
 type LogRecord interface {
 	Op() int
 	TxNumber() int
-	Undo(txNum int)
+	Undo(tx *Transaction)
 }
 
 // Factory function to create LogRecord from byte slice

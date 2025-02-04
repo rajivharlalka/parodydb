@@ -1,4 +1,4 @@
-package concurrency
+package tx
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"github.com/rajivharlalka/parodydb/pkg/buffer"
 	"github.com/rajivharlalka/parodydb/pkg/fs"
 	"github.com/rajivharlalka/parodydb/pkg/logmgr"
+	"github.com/rajivharlalka/parodydb/pkg/tx/concurrency"
 )
 
 var nextTxNum atomic.Int32
@@ -15,7 +16,7 @@ const END_OF_FILE int = -1
 
 type Transaction struct {
 	rm      *RecoveryMgr
-	cm      *ConcurrencyMgr
+	cm      *concurrency.ConcurrencyMgr
 	fm      *fs.FileMgr
 	buffers *BufferList
 	bm      *buffer.BufferMgr
@@ -23,10 +24,10 @@ type Transaction struct {
 }
 
 func NewTransaction(fm *fs.FileMgr, lm *logmgr.LogMgr, bm *buffer.BufferMgr) *Transaction {
-	cm := NewConcurrencyMgr()
+	cm := concurrency.NewConcurrencyMgr()
 	bl := NewBufferList(bm)
 	tx := &Transaction{cm: cm, fm: fm, bm: bm, buffers: bl, txnum: getNextTxNum()}
-	tx.rm = newRecoveryMgr(tx, 0, lm, bm)
+	tx.rm = NewRecoveryMgr(tx, 0, lm, bm)
 	return tx
 }
 
