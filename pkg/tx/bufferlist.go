@@ -16,7 +16,7 @@ type BufferList struct {
 }
 
 func NewBufferList(bm *buffer.BufferMgr) *BufferList {
-	return &BufferList{bm: bm}
+	return &BufferList{buffers: make(map[*fs.BlockId]*buffer.Buffer), bm: bm}
 }
 
 func (bl *BufferList) getBuffer(blk *fs.BlockId) *buffer.Buffer {

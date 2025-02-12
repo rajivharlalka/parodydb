@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"encoding/binary"
 	"fmt"
 
 	"github.com/rajivharlalka/parodydb/pkg/fs"
@@ -16,16 +15,16 @@ type CheckpointRecord struct {
 }
 
 func NewCheckpointRecord(p *fs.Page) *CheckpointRecord {
-	tpos := binary.Size(0)
+	tpos := 4
 	txnum := p.GetInt(tpos)
-	fpos := tpos + binary.Size(0)
+	fpos := tpos + 4
 	filename := p.GetString(fpos)
 	bpos := fpos + fs.MaxLength(len(filename))
 	blknum := p.GetInt(bpos)
 	blk := fs.NewBlockId(filename, blknum)
-	opos := bpos + binary.Size(0)
+	opos := bpos + 4
 	offset := p.GetInt(opos)
-	vpos := opos + binary.Size(0)
+	vpos := opos + 4
 	val := p.GetString(vpos)
 
 	return &CheckpointRecord{txnum, int(offset), val, *blk}

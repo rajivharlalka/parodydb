@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"encoding/binary"
 	"fmt"
 
 	"github.com/rajivharlalka/parodydb/pkg/fs"
@@ -16,16 +15,16 @@ type SetStringRecord struct {
 }
 
 func NewSetStringRecord(p *fs.Page) *SetStringRecord {
-	tpos := binary.Size(int32(0))
+	tpos := 4
 	txnum := p.GetInt(tpos)
-	fpos := tpos + binary.Size(int32(0))
+	fpos := tpos + 4
 	filename := p.GetString(fpos)
 	bpos := fpos + fs.MaxLength(len(filename))
 	blknum := p.GetInt(bpos)
 	blk := fs.NewBlockId(filename, blknum)
-	opos := bpos + binary.Size(int32(0))
+	opos := bpos + 4
 	offset := p.GetInt(opos)
-	vpos := opos + binary.Size(int32(0))
+	vpos := opos + 4
 	val := p.GetString(vpos)
 
 	return &SetStringRecord{txnum, offset, val, blk}
@@ -51,12 +50,13 @@ func (s *SetStringRecord) ToString() string {
 }
 
 func WriteStringRecordToLog(lm *logmgr.LogMgr, txnum int, blk *fs.BlockId, offset int, val string) int {
-	tpos := binary.Size(0)
-	fpos := tpos + binary.Size(0)
+	tpos := 4
+	fpos := tpos + 4
 	bpos := fpos + fs.MaxLength(len(blk.FileName()))
-	opos := bpos + binary.Size(0)
-	vpos := opos + fs.MaxLength(len(val))
-	rec := make([]byte, vpos+binary.Size(0))
+	opos := bpos + 4
+	vpos := opos + 4
+	reclength := vpos + fs.MaxLength(len(val))
+	rec := make([]byte, reclength)
 	p := fs.NewPageFromBytes(rec)
 	p.SetInt(0, SETSTRING)
 	p.SetInt(tpos, txnum)

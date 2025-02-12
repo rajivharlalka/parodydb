@@ -8,7 +8,8 @@ type ConcurrencyMgr struct {
 }
 
 func NewConcurrencyMgr() *ConcurrencyMgr {
-	return &ConcurrencyMgr{}
+	ltbl := NewLockTable()
+	return &ConcurrencyMgr{locktbl: ltbl, locks: make(map[*fs.BlockId]string)}
 }
 
 func (c *ConcurrencyMgr) SLock(blk *fs.BlockId) {

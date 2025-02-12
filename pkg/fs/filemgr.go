@@ -13,23 +13,28 @@ type FileMgr struct {
 	blockSize   int
 	files       map[string]*os.File
 	mu          *sync.Mutex
+	isNew       bool
 }
 
 func NewFileManager(directory string, blkSize int) (*FileMgr, error) {
 	dir, err := os.Open(directory)
-	if err != nil && errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir(directory, os.ModeDir|os.ModePerm)
-		if err != nil {
+	isNew := false
+	if err != nil {
+		isNew = errors.Is(err, os.ErrNotExist)
+
+		if isNew {
+			err := os.Mkdir(directory, os.ModeDir|os.ModePerm)
+			if err != nil {
+				return nil, err
+			}
+
+			dir, _ = os.Open(directory)
+		} else {
 			return nil, err
 		}
-
-		dir, err = os.Open(directory)
-	}
-	if err != nil {
-		return nil, err
 	}
 
-	return &FileMgr{dbDirectory: dir, blockSize: blkSize, files: make(map[string]*os.File), mu: &sync.Mutex{}}, nil
+	return &FileMgr{dbDirectory: dir, blockSize: blkSize, files: make(map[string]*os.File), mu: &sync.Mutex{}, isNew: isNew}, nil
 }
 
 func (f *FileMgr) Read(blk *BlockId, p *Page) {
@@ -54,7 +59,10 @@ func (f *FileMgr) Write(blk *BlockId, p *Page) {
 	defer f.mu.Unlock()
 	file := f.getFile(blk.filename)
 
-	file.Seek(int64(blk.blknum)*int64(f.blockSize), 0)
+	_, err := file.Seek(int64(blk.blknum)*int64(f.blockSize), 0)
+	if err != nil {
+		panic(err)
+	}
 	bytesWritten, err := file.Write(p.buffer)
 	if err != nil {
 		panic(err)
@@ -100,15 +108,22 @@ func (f *FileMgr) BlockSize() int {
 }
 
 func (f *FileMgr) getFile(filename string) *os.File {
-	file, ok := f.files[filename]
-	if ok {
+	file, has := f.files[filename]
+	if has {
 		return file
 	}
+	var err error
 	p := path.Join(f.dbDirectory.Name(), filename)
-	file, err := os.Create(p)
-	if err != nil {
-		panic(err)
+	if file, err = os.OpenFile(p, os.O_RDWR, os.ModeAppend); errors.Is(err, os.ErrNotExist) {
+		file, err = os.Create(p)
+		if err != nil {
+			panic(err)
+		}
 	}
 	f.files[filename] = file
 	return file
+}
+
+func (f *FileMgr) IsNew() bool {
+	return f.isNew
 }

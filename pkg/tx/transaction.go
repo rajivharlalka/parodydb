@@ -26,8 +26,9 @@ type Transaction struct {
 func NewTransaction(fm *fs.FileMgr, lm *logmgr.LogMgr, bm *buffer.BufferMgr) *Transaction {
 	cm := concurrency.NewConcurrencyMgr()
 	bl := NewBufferList(bm)
-	tx := &Transaction{cm: cm, fm: fm, bm: bm, buffers: bl, txnum: getNextTxNum()}
-	tx.rm = NewRecoveryMgr(tx, 0, lm, bm)
+	txnum := getNextTxNum()
+	tx := &Transaction{cm: cm, fm: fm, bm: bm, buffers: bl, txnum: txnum}
+	tx.rm = NewRecoveryMgr(tx, txnum, lm, bm)
 	return tx
 }
 

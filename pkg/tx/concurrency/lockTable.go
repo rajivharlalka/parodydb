@@ -21,6 +21,7 @@ func NewLockTable() *LockTable {
 	return &LockTable{
 		locks:   make(map[*fs.BlockId]int),
 		waiters: make(map[*fs.BlockId]chan struct{}),
+		mu:      sync.Mutex{},
 	}
 }
 
@@ -58,7 +59,7 @@ func (lt *LockTable) XLock(blk *fs.BlockId) error {
 	start := time.Now()
 
 	// While any lock is still held on this file...
-	for lt.locks[blk] != 0 {
+	for lt.locks[blk] > 1 {
 		ch := lt.getOrCreateWaitChannel(blk)
 		lt.mu.Unlock()
 
