@@ -1,6 +1,10 @@
 package record
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/rajivharlalka/parodydb/pkg/fs"
+)
 
 type Schema struct {
 	fields []string
@@ -58,4 +62,13 @@ func (s *Schema) Length(fldname string) int {
 
 func (s *Schema) Type(fldname string) int {
 	return s.info[fldname].fieldType
+}
+
+func (s *Schema) lengthInBytes(fldname string) int {
+	fldType := s.Type(fldname)
+	if fldType == INTEGER {
+		return 4
+	} else {
+		return fs.MaxLength(s.Length(fldname))
+	}
 }
